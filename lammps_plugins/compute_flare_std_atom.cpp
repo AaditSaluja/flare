@@ -389,7 +389,7 @@ void ComputeFlareStdAtom::read_file(char *filename) {
 
     fgets(line, MAXLINE, fptr);
     sscanf(line, "%s", bodyorder_string); // Body order B1/2
-    if (strcmp(body_order_string, "B2")) {
+    if (strcmp(bodyorder_string, "B2")) {
       error->all(FLERR, "Descriptors need to be B2");
     }
 
@@ -523,7 +523,7 @@ void ComputeFlareStdAtom::read_L_inverse(char *filename) {
     hyperparameters(3) = sn;
 
     fgets(line, MAXLINE, fptr);
-    
+
     sscanf(line, "%s", bodyorder_string); // Body order B1/2
     if (strcmp(bodyorder_string, "B2")) {
       error->all(FLERR, "Descriptors need to be B2");

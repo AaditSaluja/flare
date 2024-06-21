@@ -587,7 +587,7 @@ void ComputeFlareStdAtom::read_L_inverse(char *filename) {
     cutoff_function = quadratic_cutoff;
   }else if (!strcmp(cutoff_string, "cosine")){
     cutoff_function = cos_cutoff;
-  }else{}
+  }else{
     error->all(FLERR, "Please use quadratic or cosine cutoff function.");
   }
 

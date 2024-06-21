@@ -351,7 +351,7 @@ void ComputeFlareStdAtom::parse_cutoff_matrix(int n_species, FILE *fptr){
 
 void ComputeFlareStdAtom::read_file(char *filename) {
   int me = comm->me;
-  char line[MAXLINE], radial_string[MAXLINE], cutoff_string[MAXLINE], kernel_string[MAXLINE];
+  char line[MAXLINE], radial_string[MAXLINE], cutoff_string[MAXLINE], kernel_string[MAXLINE], bodyorder_string[MAXLINE];
   int radial_string_length, cutoff_string_length, kernel_string_length;
   FILE *fptr;
 
@@ -386,6 +386,11 @@ void ComputeFlareStdAtom::read_file(char *filename) {
     fgets(line, MAXLINE, fptr);
     sscanf(line, "%s", kernel_string); // kernel name
     kernel_string_length = strlen(kernel_string);
+
+    sscanf(line, "%s", bodyorder_string); // Body order B1/2
+    if (strcmp(body_order_string, "B2")) {
+      error->all(FLERR, "Descriptors need to be B2");
+    }
 
     fgets(line, MAXLINE, fptr);
     sscanf(line, "%s", radial_string); // Radial basis set
@@ -426,13 +431,16 @@ void ComputeFlareStdAtom::read_file(char *filename) {
   if (!strcmp(radial_string, "chebyshev")) {
     basis_function = chebyshev;
     radial_hyps = std::vector<double>{0, cutoff};
+  }else {
+    error->all(FLERR, "Please use chebyshev radial basis function.");
   }
 
   // Set the cutoff function.
-  if (!strcmp(cutoff_string, "quadratic"))
+  if (!strcmp(cutoff_string, "quadratic")){
     cutoff_function = quadratic_cutoff;
-  else if (!strcmp(cutoff_string, "cosine"))
+  }else if (!strcmp(cutoff_string, "cosine")){
     cutoff_function = cos_cutoff;
+  }
 
   // Set the kernel
   if (!strcmp(kernel_string, "NormalizedDotProduct")) {
@@ -475,8 +483,8 @@ void ComputeFlareStdAtom::read_file(char *filename) {
 
 void ComputeFlareStdAtom::read_L_inverse(char *filename) {
   int me = comm->me;
-  char line[MAXLINE], radial_string[MAXLINE], cutoff_string[MAXLINE], kernel_string[MAXLINE];
-  int radial_string_length, cutoff_string_length, kernel_string_length;
+  char line[MAXLINE], radial_string[MAXLINE], cutoff_string[MAXLINE], bodyorder_string[MAXLINE], kernel_string[MAXLINE];
+  int radial_string_length, cutoff_string_length, kernel_string_length, bodyorder_string_length;
   FILE *fptr;
 
   // Check that the potential file can be opened.
@@ -514,6 +522,15 @@ void ComputeFlareStdAtom::read_L_inverse(char *filename) {
     hyperparameters(3) = sn;
 
     fgets(line, MAXLINE, fptr);
+
+    sscanf(line, "%s", bodyorder_string); // Body order B1/2
+
+    if (strcmp(body_order_string, "B2")) {
+      error->all(FLERR, "Descriptors need to be B2");
+    }
+
+    fgets(line, MAXLINE, fptr);
+
     sscanf(line, "%s", radial_string); // Radial basis set
     radial_string_length = strlen(radial_string);
 
@@ -561,13 +578,18 @@ void ComputeFlareStdAtom::read_L_inverse(char *filename) {
   if (!strcmp(radial_string, "chebyshev")) {
     basis_function = chebyshev;
     radial_hyps = std::vector<double>{0, cutoff};
+  }else {
+    error->all(FLERR, "Please use chebyshev radial basis function.");
   }
 
   // Set the cutoff function.
-  if (!strcmp(cutoff_string, "quadratic"))
+  if (!strcmp(cutoff_string, "quadratic")){
     cutoff_function = quadratic_cutoff;
-  else if (!strcmp(cutoff_string, "cosine"))
+  }else if (!strcmp(cutoff_string, "cosine")){
     cutoff_function = cos_cutoff;
+  }else{}
+    error->all(FLERR, "Please use quadratic or cosine cutoff function.");
+  }
 
   // Set the kernel
   if (!strcmp(kernel_string, "NormalizedDotProduct")) {
@@ -621,7 +643,7 @@ void ComputeFlareStdAtom::read_sparse_descriptors(char *filename) {
     int n_kern = 0;
     sscanf(line, "%i", &n_kern);
     if (n_kern != n_kernels) {
-      error->all(FLERR, "n_kernals in sparse_descriptors and L_inv not match");
+      error->all(FLERR, "n_kernels in sparse_descriptors and L_inv not match");
     }
   }
 

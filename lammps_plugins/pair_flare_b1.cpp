@@ -1,4 +1,4 @@
-#include "pair_flare.h"
+#include "pair_flare_b1.h"
 #include "atom.h"
 #include "comm.h"
 #include "error.h"
@@ -40,7 +40,7 @@ get_timestamp ()
 
 /* ---------------------------------------------------------------------- */
 
-PairFLARE::PairFLARE(LAMMPS *lmp) : Pair(lmp) {
+PairFLAREB1::PairFLAREB1(LAMMPS *lmp) : Pair(lmp) {
   restartinfo = 0;
   manybody_flag = 1;
 
@@ -51,7 +51,7 @@ PairFLARE::PairFLARE(LAMMPS *lmp) : Pair(lmp) {
    check if allocated, since class can be destructed when incomplete
 ------------------------------------------------------------------------- */
 
-PairFLARE::~PairFLARE() {
+PairFLAREB1::~PairFLAREB1() {
   if (copymode)
     return;
 
@@ -65,7 +65,7 @@ PairFLARE::~PairFLARE() {
 
 /* ---------------------------------------------------------------------- */
 
-void PairFLARE::compute(int eflag, int vflag) {
+void PairFLAREB1::compute(int eflag, int vflag) {
   int i, j, ii, jj, inum, jnum, itype, jtype, n_inner, n_count;
   double evdwl, delx, dely, delz, xtmp, ytmp, ztmp, rsq;
   double *coeff;
@@ -87,9 +87,10 @@ void PairFLARE::compute(int eflag, int vflag) {
   firstneigh = list->firstneigh;
 
   int beta_init, beta_counter;
-  double B2_norm_squared, B2_val_1, B2_val_2; // B2_val_1 and B2_val_2 look like unused variables
-  Eigen::VectorXd single_bond_vals, B2_vals, B2_env_dot, u;
-  Eigen::MatrixXd single_bond_env_dervs, B2_env_dervs;
+  double norm_squared;
+  // New vars: beta_p, partial forces
+  Eigen::VectorXd single_bond_vals, vals, env_dot, u, beta_p, partial_forces;
+  Eigen::MatrixXd single_bond_env_dervs, env_dervs;
   double empty_thresh = 1e-8;
 
   for (ii = 0; ii < inum; ii++) {
@@ -125,46 +126,48 @@ void PairFLARE::compute(int eflag, int vflag) {
                                  single_bond_env_dervs, cutoff_matrix);
 
     // Compute invariant descriptors.
-    B2_descriptor(B2_vals, B2_norm_squared,
-                  single_bond_vals, n_species, n_max, l_max);
-
-    compute_energy_and_u(B2_vals, B2_norm_squared, single_bond_vals, power,
-           n_species, n_max, l_max, beta_matrices[itype - 1], u, &evdwl, normalized);
+    // Study B1 vs B2
+    B1_descriptor(vals, env_dervs, norm_squared, env_dot,
+                  single_bond_vals, single_bond_env_dervs, 
+                  n_species, n_max, l_max);
 
     // Continue if the environment is empty.
-    if (B2_norm_squared < empty_thresh)
+    if (norm_squared < empty_thresh)
       continue;
+
+    // why do we compute here? Compare to b2 -> Investigaet where power and beta_matrices is pulled from, understand the calculations
+    // Compute local energy and partial forces.
+    if (power == 1) {
+      double B1_norm = pow(norm_squared, 0.5);
+      evdwl = beta_matrices[itype - 1].col(0).dot(vals) / B1_norm;
+      partial_forces = - env_dervs * beta_matrices[itype - 1].col(0) / B1_norm + evdwl * env_dot / norm_squared;
+    } else if (power == 2) {
+      beta_p = beta_matrices[itype - 1] * vals;
+      evdwl = vals.dot(beta_p) / norm_squared;
+      partial_forces =
+        2 * (- env_dervs * beta_p + evdwl * env_dot) / norm_squared;
+    }
 
     // Update energy, force and stress arrays.
     n_count = 0;
-    double fxsum = 0, fysum = 0, fzsum = 0;
     for (int jj = 0; jj < jnum; jj++) {
       j = jlist[jj];
-      int s = type[j] - 1;
-      double cutoff_val = cutoff_matrix(itype-1, s);
       delx = xtmp - x[j][0];
       dely = ytmp - x[j][1];
       delz = ztmp - x[j][2];
       rsq = delx * delx + dely * dely + delz * delz;
-
-      if (rsq < (cutoff_val * cutoff_val)) {
-        // Compute partial force f_ij = u * dA/dr_ij
-        double fx = single_bond_env_dervs.row(n_count * 3).dot(u);
-        double fy = single_bond_env_dervs.row(n_count * 3 + 1).dot(u);
-        double fz = single_bond_env_dervs.row(n_count * 3 + 2).dot(u);
-        // Compute local energy and partial forces.
-
+  
+      if (rsq < (cutoff * cutoff)) {
+        double fx = -partial_forces(n_count * 3);
+        double fy = -partial_forces(n_count * 3 + 1);
+        double fz = -partial_forces(n_count * 3 + 2);
         f[i][0] += fx;
         f[i][1] += fy;
         f[i][2] += fz;
         f[j][0] -= fx;
         f[j][1] -= fy;
         f[j][2] -= fz;
-        fxsum += fx;
-        fysum += fy;
-        fzsum += fz;
-        //printf("i = %d, j = %d, f = %g %g %g\n", i, j, fx, fy, fz);
-
+  
         if (vflag) {
           ev_tally_xyz(i, j, nlocal, newton_pair, 0.0, 0.0, fx, fy, fz, delx,
                        dely, delz);
@@ -172,8 +175,6 @@ void PairFLARE::compute(int eflag, int vflag) {
         n_count++;
       }
     }
-      //printf("i = %d, Fsum = %g %g %g\n", i, fxsum, fysum, fzsum);
-
     // Compute local energy.
     if (eflag)
       ev_tally_full(i, 2.0 * evdwl, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -187,16 +188,17 @@ void PairFLARE::compute(int eflag, int vflag) {
    allocate all arrays
 ------------------------------------------------------------------------- */
 
-void PairFLARE::allocate() {
+void PairFLAREB1::allocate() {
   allocated = 1;
   int n = atom->ntypes;
 
   memory->create(setflag, n + 1, n + 1, "pair:setflag");
 
+  
   // Set the entire setflag to 1 (otherwise pair.cpp will throw an error)
   // off-diagonal needed for hybrid/overlay (note: we only support pair_coeff * *)
-  for (int i = 1; i <= n; i++){
-    for (int j = 1; j <= n; j++){
+  for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= n; j++) {
       setflag[i][j] = 1;
     }
   }
@@ -209,7 +211,7 @@ void PairFLARE::allocate() {
    global settings
 ------------------------------------------------------------------------- */
 
-void PairFLARE::settings(int narg, char ** /*arg*/) {
+void PairFLAREB1::settings(int narg, char ** /*arg*/) {
   // "flare" should be the only word after "pair_style" in the input file.
   if (narg > 0)
     error->all(FLERR, "Illegal pair_style command");
@@ -220,7 +222,7 @@ void PairFLARE::settings(int narg, char ** /*arg*/) {
    read DYNAMO funcfl file
 ------------------------------------------------------------------------- */
 
-void PairFLARE::coeff(int narg, char **arg) {
+void PairFLAREB1::coeff(int narg, char **arg) {
   if (!allocated)
     allocate();
 
@@ -239,7 +241,7 @@ void PairFLARE::coeff(int narg, char **arg) {
    init specific to this pair style
 ------------------------------------------------------------------------- */
 
-void PairFLARE::init_style() {
+void PairFLAREB1::init_style() {
   // Require newton on.
   if (force->newton_pair == 0)
     error->all(FLERR, "Pair style requires newton pair on");
@@ -252,7 +254,7 @@ void PairFLARE::init_style() {
    init for one type pair i,j and corresponding j,i
 ------------------------------------------------------------------------- */
 
-double PairFLARE::init_one(int i, int j) {
+double PairFLAREB1::init_one(int i, int j) {
   // init_one is called for each i, j pair in pair.cpp after calling init_style.
 
   return cutoff;
@@ -262,10 +264,11 @@ double PairFLARE::init_one(int i, int j) {
    read potential values from a DYNAMO single element funcfl file
 ------------------------------------------------------------------------- */
 
-void PairFLARE::read_file(char *filename) {
+void PairFLAREB1::read_file(char *filename) {
   int me = comm->me;
-  char line[MAXLINE], radial_string[MAXLINE], cutoff_string[MAXLINE], kernel_string[MAXLINE];
-  int radial_string_length, cutoff_string_length, kernel_string_length;
+  // diverges cuz no need to have kernel_string here, because B1
+  char line[MAXLINE], radial_string[MAXLINE], cutoff_string[MAXLINE], body_order_string[MAXLINE];
+  int radial_string_length, cutoff_string_length;
   FILE *fptr;
 
   // Check that the potential file can be opened.
@@ -283,8 +286,13 @@ void PairFLARE::read_file(char *filename) {
     fgets(line, MAXLINE, fptr); // Date and contributor
 
     fgets(line, MAXLINE, fptr); // Power, use integer instead of double for simplicity
-    sscanf(line, "%i %s", &power, &kernel_string);
-    kernel_string_length = strlen(kernel_string);
+    sscanf(line, "%i", &power);
+
+    fgets(line, MAXLINE, fptr); // Body order, B1/2/3
+    sscanf(line, "%s", body_order_string);
+    if (strcmp(body_order_string, "B1")) {
+      error->all(FLERR, "Potential has to be B1");
+    }
 
     fgets(line, MAXLINE, fptr);
     sscanf(line, "%s", radial_string); // Radial basis set
@@ -306,10 +314,8 @@ void PairFLARE::read_file(char *filename) {
   MPI_Bcast(&cutoff, 1, MPI_DOUBLE, 0, world);
   MPI_Bcast(&radial_string_length, 1, MPI_INT, 0, world);
   MPI_Bcast(&cutoff_string_length, 1, MPI_INT, 0, world);
-  MPI_Bcast(&kernel_string_length, 1, MPI_INT, 0, world);
   MPI_Bcast(radial_string, radial_string_length + 1, MPI_CHAR, 0, world);
   MPI_Bcast(cutoff_string, cutoff_string_length + 1, MPI_CHAR, 0, world);
-  MPI_Bcast(kernel_string, kernel_string_length + 1, MPI_CHAR, 0, world);
 
   // Parse the cutoffs.
   int n_cutoffs = n_species * n_species;
@@ -317,10 +323,6 @@ void PairFLARE::read_file(char *filename) {
   if (me == 0)
     grab(fptr, n_cutoffs, cutoffs);
   MPI_Bcast(cutoffs, n_cutoffs, MPI_DOUBLE, 0, world);
-
-  // Create cutsq array (used in pair.cpp)
-  memory->create(cutsq, n_species + 1, n_species + 1, "pair:cutsq");
-  memset(&cutsq[0][0], 0, (n_species + 1) * (n_species + 1) * sizeof(double));
 
   // Fill in the cutoff matrix.
   cutoff = -1;
@@ -330,7 +332,6 @@ void PairFLARE::read_file(char *filename) {
     for (int j = 0; j < n_species; j++){
       double cutoff_val = cutoffs[cutoff_count];
       cutoff_matrix(i, j) = cutoff_val;
-      cutsq[i + 1][j + 1] = cutoff_val * cutoff_val;
       if (cutoff_val > cutoff) cutoff = cutoff_val;
       cutoff_count ++;
     }
@@ -338,7 +339,7 @@ void PairFLARE::read_file(char *filename) {
 
   // Set number of descriptors.
   int n_radial = n_max * n_species;
-  n_descriptors = (n_radial * (n_radial + 1) / 2) * (l_max + 1);
+  n_descriptors = n_radial;
 
   // Check the relationship between the power spectrum and beta.
   int beta_check;
@@ -359,22 +360,10 @@ void PairFLARE::read_file(char *filename) {
   }
 
   // Set the cutoff function.
-  if (!strcmp(cutoff_string, "quadratic")){
+  if (!strcmp(cutoff_string, "quadratic"))
     cutoff_function = quadratic_cutoff;
-  }
-  else if (!strcmp(cutoff_string, "cosine")){
+  else if (!strcmp(cutoff_string, "cosine"))
     cutoff_function = cos_cutoff;
-  }
-  // Set the kernel
-  if (strcmp(kernel_string, "NormalizedDotProduct") == 0) {
-    normalized = true;
-  }
-  else if (strcmp(kernel_string, "DotProduct") == 0){
-    normalized = false;
-  }
-  else {
-    error->all(FLERR, "Kernel string not recognized, expected <power> <kernel string>");
-  }
 
   // Parse the beta vectors.
   memory->create(beta, beta_size * n_species, "pair:beta");
@@ -423,7 +412,7 @@ void PairFLARE::read_file(char *filename) {
    only called by proc 0
 ------------------------------------------------------------------------- */
 
-void PairFLARE::grab(FILE *fptr, int n, double *list) {
+void PairFLAREB1::grab(FILE *fptr, int n, double *list) {
   char *ptr;
   char line[MAXLINE];
 

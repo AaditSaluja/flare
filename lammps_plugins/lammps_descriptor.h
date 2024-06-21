@@ -35,6 +35,14 @@ void single_bond_multiple_cutoffs(
     Eigen::MatrixXd &single_bond_env_dervs,
     const Eigen::MatrixXd &cutoff_matrix);
 
+// B1 has B1_env_dervs fed in unline B2
+void B1_descriptor(Eigen::VectorXd &B1_vals, Eigen::MatrixXd &B1_env_dervs,
+                   double &norm_squared, Eigen::VectorXd &B1_env_dot,
+                   const Eigen::VectorXd &single_bond_vals,
+                   const Eigen::MatrixXd &single_bond_env_dervs, 
+                   int n_species,
+                   int N, int lmax); 
+
 void B2_descriptor(Eigen::VectorXd &B2_vals,
                    double &norm_squared,
                    const Eigen::VectorXd &single_bond_vals,
@@ -47,5 +55,6 @@ void compute_energy_and_u(Eigen::VectorXd &B2_vals,
                    int power, int n_species,
                    int N, int lmax, const Eigen::MatrixXd &beta_matrix, 
                    Eigen::VectorXd &u, double *evdwl, bool normalized);
+
 
 #endif

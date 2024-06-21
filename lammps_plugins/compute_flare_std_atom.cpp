@@ -387,7 +387,7 @@ void ComputeFlareStdAtom::read_file(char *filename) {
     sscanf(line, "%s", kernel_string); // kernel name
     kernel_string_length = strlen(kernel_string);
 
-    bodyorder_string = "B2";
+    // bodyorder_string = "B2";
     // fgets(line, MAXLINE, fptr);
     // sscanf(line, "%s", bodyorder_string); // Body order B1/2
     // if (strcmp(bodyorder_string, "B2")) {
@@ -523,7 +523,7 @@ void ComputeFlareStdAtom::read_L_inverse(char *filename) {
     hyperparameters(2) = fn;
     hyperparameters(3) = sn;
 
-    bodyorder_string = "B2";
+    // bodyorder_string = "B2";
 
     // fgets(line, MAXLINE, fptr);
 

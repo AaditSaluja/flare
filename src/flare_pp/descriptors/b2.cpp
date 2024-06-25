@@ -51,6 +51,7 @@ B2 ::B2(const std::string &radial_basis, const std::string &cutoff_function,
 
 void B2 ::write_to_file(std::ofstream &coeff_file, int coeff_size) {
   // Report radial basis set.
+  coeff_file << "B2" << "\n";
   coeff_file << radial_basis << "\n";
 
   // Record number of species, nmax, lmax, and the cutoff.

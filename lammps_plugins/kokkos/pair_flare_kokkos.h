@@ -22,7 +22,7 @@ PairStyle(flare/kk/device,PairFLAREKokkos<LMPDeviceType>)
 #ifndef LMP_PAIR_FLARE_KOKKOS_H
 #define LMP_PAIR_FLARE_KOKKOS_H
 
-#include "pair_flare.h"
+#include "pair_flare_b2.h"
 #include <pair_kokkos.h>
 
 struct TagCountCurrType{};

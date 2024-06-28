@@ -74,7 +74,7 @@ def test_write_potential(n_species, n_types, power, struc, multicut, n_cpus):
     parameters = {
         "command": lmp_command,  # set up executable for ASE
         "newton": "on",
-        "pair_style": "flare",
+        "pair_style": "flare/b2",
         "pair_coeff": [f"* * {potential_name}"],
         "timestep": "0.001\ndump_modify dump_all sort id",
     }
@@ -204,7 +204,7 @@ atom_modify sort 0 0.0
 read_data data.lammps
 
 ### interactions
-pair_style flare
+pair_style flare/b2
 pair_coeff * * {potential_file}
 {mass_str}
 

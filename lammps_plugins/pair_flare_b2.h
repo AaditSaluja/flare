@@ -3,7 +3,7 @@
 
 #ifdef PAIR_CLASS
 
-PairStyle(flare/b2, PairFLAREB2)
+PairStyle(flare, PairFLAREB2)
 
 #else
 

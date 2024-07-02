@@ -290,7 +290,7 @@ void PairFLAREB2::read_file(char *filename) {
     fgets(line, MAXLINE, fptr); // Body order, B1/2/3
     sscanf(line, "%s", body_order_string);
     if (strcmp(body_order_string, "B2")) {
-      error->all(FLERR, "Potential has to be B2");
+      error->all(FLERR, body_order_string);
     }
 
     fgets(line, MAXLINE, fptr);

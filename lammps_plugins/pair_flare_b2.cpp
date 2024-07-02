@@ -287,11 +287,11 @@ void PairFLAREB2::read_file(char *filename) {
     sscanf(line, "%i %s", &power, &kernel_string);
     kernel_string_length = strlen(kernel_string);
 
-    fgets(line, MAXLINE, fptr); // Body order, B1/2/3
-    sscanf(line, "%s", body_order_string);
-    if (strcmp(body_order_string, "B2")) {
-      error->all(FLERR, body_order_string);
-    }
+    // fgets(line, MAXLINE, fptr); // Body order, B1/2/3
+    // sscanf(line, "%s", body_order_string);
+    // if (strcmp(body_order_string, "B2")) {
+    //   error->all(FLERR, body_order_string);
+    // }
 
     fgets(line, MAXLINE, fptr);
     sscanf(line, "%s", radial_string); // Radial basis set

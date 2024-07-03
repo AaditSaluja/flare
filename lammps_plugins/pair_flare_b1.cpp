@@ -293,7 +293,6 @@ void PairFLAREB1::read_file(char *filename) {
     // if (strcmp(body_order_string, "B1")) {
     //   error->all(FLERR, "Potential has to be B1");
     // }
-    assert(false && "What?????");
 
     fgets(line, MAXLINE, fptr);
     sscanf(line, "%s", radial_string); // Radial basis set

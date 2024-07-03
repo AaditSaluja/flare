@@ -288,11 +288,12 @@ void PairFLAREB1::read_file(char *filename) {
     fgets(line, MAXLINE, fptr); // Power, use integer instead of double for simplicity
     sscanf(line, "%i", &power);
 
-    fgets(line, MAXLINE, fptr); // Body order, B1/2/3
-    sscanf(line, "%s", body_order_string);
-    if (strcmp(body_order_string, "B1")) {
-      error->all(FLERR, "Potential has to be B1");
-    }
+    // fgets(line, MAXLINE, fptr); // Body order, B1/2/3
+    // sscanf(line, "%s", body_order_string);
+    // if (strcmp(body_order_string, "B1")) {
+    //   error->all(FLERR, "Potential has to be B1");
+    // }
+    assert(false && "What?????");
 
     fgets(line, MAXLINE, fptr);
     sscanf(line, "%s", radial_string); // Radial basis set

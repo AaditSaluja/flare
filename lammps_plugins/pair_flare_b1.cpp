@@ -350,9 +350,10 @@ void PairFLAREB1::read_file(char *filename) {
   } else {
     error->all(FLERR, "Power should be 1 or 2.");
   }
-  printf("Beta Check and Beta Size: %d %d\n", beta_check, beta_size);
-  if (beta_check != beta_size)
-    error->all(FLERR, "Beta size doesn't match the number of descriptors.");
+  // printf("Beta Check and Beta Size: %d %d\n", beta_check, beta_size);
+  // if (beta_check != beta_size){
+  //   error->all(FLERR, "Beta size doesn't match the number of descriptors.");
+  // }
 
   // Set the radial basis.
   if (!strcmp(radial_string, "chebyshev")) {

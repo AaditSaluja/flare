@@ -1,6 +1,4 @@
-#include "pair_flare.h"
-// #include "pair_flare_b1.cpp"
-// #include "pair_flare_b2.cpp"
+#include "pair_flare_b2.h"
 #include "atom.h"
 #include "comm.h"
 #include "error.h"

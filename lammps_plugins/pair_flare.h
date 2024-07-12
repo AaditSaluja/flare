@@ -1,5 +1,5 @@
-// Aadit Saluja
-// B1 and B2 Accumulator
+// Jonathan Vandermause
+// Pair style based on pair_eam.h
 
 #ifdef PAIR_CLASS
 
@@ -7,8 +7,8 @@ PairStyle(flare, PairFLAREB2)
 
 #else
 
-#ifndef LMP_PAIR_FLARE_H
-#define LMP_PAIR_FLARE_H
+#ifndef LMP_PAIR_FLARE_B2_H
+#define LMP_PAIR_FLARE_B2_H
 
 #include "pair.h"
 #include <Eigen/Dense>

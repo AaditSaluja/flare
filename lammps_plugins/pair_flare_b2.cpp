@@ -40,7 +40,7 @@ get_timestamp ()
 
 /* ---------------------------------------------------------------------- */
 
-PairFLAREB2::PairFLAREB2(LAMMPS *lmp) : Pair(lmp) {
+PairFLAREBk::PairFLAREBk(LAMMPS *lmp) : Pair(lmp) {
   restartinfo = 0;
   manybody_flag = 1;
 
@@ -51,7 +51,7 @@ PairFLAREB2::PairFLAREB2(LAMMPS *lmp) : Pair(lmp) {
    check if allocated, since class can be destructed when incomplete
 ------------------------------------------------------------------------- */
 
-PairFLAREB2::~PairFLAREB2() {
+PairFLAREBk::~PairFLAREBk() {
   if (copymode)
     return;
 
@@ -65,7 +65,7 @@ PairFLAREB2::~PairFLAREB2() {
 
 /* ---------------------------------------------------------------------- */
 
-void PairFLAREB2::compute(int eflag, int vflag) {
+void PairFLAREBk::compute(int eflag, int vflag) {
   int i, j, ii, jj, inum, jnum, itype, jtype, n_inner, n_count;
   double evdwl, delx, dely, delz, xtmp, ytmp, ztmp, rsq;
   double *coeff;
@@ -187,7 +187,7 @@ void PairFLAREB2::compute(int eflag, int vflag) {
    allocate all arrays
 ------------------------------------------------------------------------- */
 
-void PairFLAREB2::allocate() {
+void PairFLAREBk::allocate() {
   allocated = 1;
   int n = atom->ntypes;
 
@@ -209,7 +209,7 @@ void PairFLAREB2::allocate() {
    global settings
 ------------------------------------------------------------------------- */
 
-void PairFLAREB2::settings(int narg, char ** /*arg*/) {
+void PairFLAREBk::settings(int narg, char ** /*arg*/) {
   // "flare" should be the only word after "pair_style" in the input file.
   if (narg > 0)
     error->all(FLERR, "Illegal pair_style command");
@@ -220,7 +220,7 @@ void PairFLAREB2::settings(int narg, char ** /*arg*/) {
    read DYNAMO funcfl file
 ------------------------------------------------------------------------- */
 
-void PairFLAREB2::coeff(int narg, char **arg) {
+void PairFLAREBk::coeff(int narg, char **arg) {
   if (!allocated)
     allocate();
 
@@ -239,7 +239,7 @@ void PairFLAREB2::coeff(int narg, char **arg) {
    init specific to this pair style
 ------------------------------------------------------------------------- */
 
-void PairFLAREB2::init_style() {
+void PairFLAREBk::init_style() {
   // Require newton on.
   if (force->newton_pair == 0)
     error->all(FLERR, "Pair style requires newton pair on");
@@ -252,7 +252,7 @@ void PairFLAREB2::init_style() {
    init for one type pair i,j and corresponding j,i
 ------------------------------------------------------------------------- */
 
-double PairFLAREB2::init_one(int i, int j) {
+double PairFLAREBk::init_one(int i, int j) {
   // init_one is called for each i, j pair in pair.cpp after calling init_style.
 
   return cutoff;
@@ -262,7 +262,7 @@ double PairFLAREB2::init_one(int i, int j) {
    read potential values from a DYNAMO single element funcfl file
 ------------------------------------------------------------------------- */
 
-void PairFLAREB2::read_file(char *filename) {
+void PairFLAREBk::read_file(char *filename) {
   int me = comm->me;
   // body_order_string indicates whether potentials are for B1, B2, or B3.
   char line[MAXLINE], radial_string[MAXLINE], cutoff_string[MAXLINE], body_order_string[MAXLINE], kernel_string[MAXLINE];
@@ -434,7 +434,7 @@ void PairFLAREB2::read_file(char *filename) {
    only called by proc 0
 ------------------------------------------------------------------------- */
 
-void PairFLAREB2::grab(FILE *fptr, int n, double *list) {
+void PairFLAREBk::grab(FILE *fptr, int n, double *list) {
   char *ptr;
   char line[MAXLINE];
 

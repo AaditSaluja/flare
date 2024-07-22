@@ -3,7 +3,7 @@
 
 #ifdef PAIR_CLASS
 
-PairStyle(flare/b2, PairFLAREB2)
+PairStyle(flare/bk, PairFLAREBk)
 
 #else
 
@@ -17,10 +17,10 @@ PairStyle(flare/b2, PairFLAREB2)
 
 namespace LAMMPS_NS {
 
-class PairFLAREB2 : public Pair {
+class PairFLAREBk : public Pair {
 public:
-  PairFLAREB2(class LAMMPS *);
-  virtual ~PairFLAREB2();
+  PairFLAREBk(class LAMMPS *);
+  virtual ~PairFLAREBk();
   virtual void compute(int, int);
   void settings(int, char **);
   virtual void coeff(int, char **);

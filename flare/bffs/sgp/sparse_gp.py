@@ -39,6 +39,7 @@ class SGP_Wrapper:
 
         self.sparse_gp = SparseGP(kernels, sigma_e, sigma_f, sigma_s)
         self.descriptor_calculators = descriptor_calculators
+        # do they have the same cutoff matrix?
         self.cutoff = cutoff
         self.hyps_mask = None
         self.species_map = species_map
@@ -375,11 +376,13 @@ class SGP_Wrapper:
         if sgp is None:
             sgp = self.sparse_gp
             self.atom_indices.append(atom_indices)
-
+        
+        # Call to c++ method in sparse_gp.cpp
         sgp.add_training_structure(
             structure_descriptor, atom_indices, rel_e_noise, rel_f_noise, rel_s_noise
         )
         self.rel_efs_noise.append([rel_e_noise, rel_f_noise, rel_s_noise])
+        # does this decide what atoms to consider in sparse envs? Will B1 and B2 have the same envs?
         if mode == "all":
             if not custom_range:
                 sgp.add_all_environments(structure_descriptor)

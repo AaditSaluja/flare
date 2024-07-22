@@ -44,6 +44,7 @@ public:
   ///@}
 
   double cutoff, single_sweep_cutoff, volume;
+  double cutoff_b1, cutoff_b2;
   int sweep, n_neighbors;
 
   /**
@@ -60,6 +61,9 @@ public:
   ///@{
   std::vector<Descriptor *> descriptor_calculators;
   std::vector<DescriptorValues> descriptors;
+
+  std::vector<Descriptor *> descriptor_calculators_comb[2];
+  std::vector<DescriptorValues> descriptors_comb[2];
   ///@}
 
   /** @name Structure labels */

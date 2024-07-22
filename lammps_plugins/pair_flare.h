@@ -1,5 +1,5 @@
-// Jonathan Vandermause
-// Pair style based on pair_eam.h
+// Aadit Saluja
+// A combination of pair_flare_b1.h and pair_flare_b2.h
 
 #ifdef PAIR_CLASS
 

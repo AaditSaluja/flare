@@ -7,8 +7,8 @@ PairStyle(flare/b12, PairFLARE)
 
 #else
 
-#ifndef LMP_PAIR_FLARE_B2_H
-#define LMP_PAIR_FLARE_B2_H
+#ifndef LMP_PAIR_FLARE_H
+#define LMP_PAIR_FLARE_H
 
 #include "pair.h"
 #include <Eigen/Dense>

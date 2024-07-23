@@ -145,7 +145,7 @@ def test_otf_md(md_engine):
         config = yaml.safe_load(f)
 
     config["supercell"]["file"] = "myotf_dft.xyz"
-    # config["dft_calc"]["kwargs"]["filename"] = "myotf_dft.xyz"
+    config["dft_calc"]["kwargs"]["filename"] = "myotf_dft.xyz"
     config["otf"]["md_kwargs"]["filenames"] = ["myotf_dft.xyz"]
     config["otf"]["output_name"] = "direct"
     config["otf"]["build_mode"] = "direct"

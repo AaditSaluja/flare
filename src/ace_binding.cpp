@@ -62,7 +62,7 @@ PYBIND11_MODULE(_C_flare, m) {
       .def_readwrite("local_uncertainties", &Structure::local_uncertainties)
       .def_readwrite("descriptors", &Structure::descriptors)
       .def("get_descriptor_calculators", &get_descriptor_calculators)
-      .def("set_descriptor_calculators", &set_descriptor_calculators);
+      .def("set_descriptor_calculators", &set_descriptor_calculators)
       .def("compute_descriptors", &Structure::compute_descriptors)
       .def("wrap_positions", &Structure::wrap_positions)
       .def_static("to_json", &Structure::to_json)

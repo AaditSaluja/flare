@@ -25,6 +25,7 @@
 
 namespace py = pybind11;
 
+
 PYBIND11_MODULE(_C_flare, m) {
   // Structure
   py::class_<Structure>(m, "Structure")
@@ -47,91 +48,34 @@ PYBIND11_MODULE(_C_flare, m) {
       .def_readwrite("variance_efs", &Structure::variance_efs)
       .def_readwrite("local_uncertainties", &Structure::local_uncertainties)
       .def_readwrite("descriptors", &Structure::descriptors)
-      .def_readwrite("descriptor_calculators",
-                    &Structure::descriptor_calculators)
+      .def_readwrite("descriptor_calculators", &Structure::descriptor_calculators)
       .def("compute_descriptors", &Structure::compute_descriptors)
       .def("wrap_positions", &Structure::wrap_positions)
       .def_static("to_json", &Structure::to_json)
       .def_static("from_json", &Structure::from_json);
 
-  // Descriptor values
-  py::class_<DescriptorValues>(m, "DescriptorValues")
-      .def(py::init<>())
-      .def_readwrite("n_descriptors", &DescriptorValues::n_descriptors)
-      .def_readwrite("n_types", &DescriptorValues::n_types)
-      .def_readwrite("n_atoms", &DescriptorValues::n_atoms)
-      .def_readwrite("volume", &DescriptorValues::volume)
-      .def_readwrite("descriptors", &DescriptorValues::descriptors)
-      .def_readwrite("descriptor_force_dervs",
-                     &DescriptorValues::descriptor_force_dervs)
-      .def_readwrite("neighbor_coordinates",
-                     &DescriptorValues::neighbor_coordinates)
-      .def_readwrite("descriptor_norms", &DescriptorValues::descriptor_norms)
-      .def_readwrite("descriptor_force_dots",
-                     &DescriptorValues::descriptor_force_dots)
-      .def_readwrite("cutoff_values", &DescriptorValues::cutoff_values)
-      .def_readwrite("cutoff_dervs", &DescriptorValues::cutoff_dervs)
-      .def_readwrite("neighbor_counts", &DescriptorValues::neighbor_counts)
-      .def_readwrite("cumulative_neighbor_counts",
-                     &DescriptorValues::cumulative_neighbor_counts)
-      .def_readwrite("cumulative_type_count",
-                     &DescriptorValues::cumulative_type_count)
-      .def_readwrite("atom_indices", &DescriptorValues::atom_indices)
-      .def_readwrite("neighbor_indices", &DescriptorValues::neighbor_indices)
-      .def_readwrite("n_clusters_by_type",
-                     &DescriptorValues::n_clusters_by_type)
-      .def_readwrite("n_neighbors_by_type",
-                     &DescriptorValues::n_neighbors_by_type);
-
-  py::class_<ClusterDescriptor>(m, "ClusterDescriptor")
-      .def_readonly("descriptors", &ClusterDescriptor::descriptors)
-      .def_readonly("descriptor_norms", &ClusterDescriptor::descriptor_norms);
-
-  // Descriptor calculators
-  py::class_<DescriptorCalculator>(m, "DescriptorCalculator")
-      .def(py::init<>());
-
-  py::class_<std::array<DescriptorCalculator, 2>>(m, "DescriptorCalculatorArray")
-      .def(py::init<>())
-      .def("__getitem__", [](const std::array<DescriptorCalculator, 2> &a, size_t i) {
-        if (i >= 2) throw std::out_of_range("Index out of range");
-        return a[i];})
-      .def("__setitem__", [](std::array<DescriptorCalculator, 2> &a, size_t i, const DescriptorCalculator &v) {
-        if (i >= 2) throw std::out_of_range("Index out of range");
-        a[i] = v;});
-
+  // Handling descriptor_calculators array with 2 elements
   py::class_<Descriptor>(m, "Descriptor")
       .def("compute_struc", &Descriptor::compute_struc);
 
   py::class_<TwoBody, Descriptor>(m, "TwoBody")
-      .def(py::init<double, int, const std::string &,
-                    const std::vector<double> &>());
+      .def(py::init<double, int, const std::string &, const std::vector<double> &>());
 
   py::class_<ThreeBody, Descriptor>(m, "ThreeBody")
-      .def(py::init<double, int, const std::string &,
-                    const std::vector<double> &>());
+      .def(py::init<double, int, const std::string &, const std::vector<double> &>());
 
   py::class_<ThreeBodyWide, Descriptor>(m, "ThreeBodyWide")
-      .def(py::init<double, int, const std::string &,
-                    const std::vector<double> &>());
+      .def(py::init<double, int, const std::string &, const std::vector<double> &>());
 
   py::class_<FourBody, Descriptor>(m, "FourBody")
-      .def(py::init<double, int, const std::string &,
-                    const std::vector<double> &>());
+      .def(py::init<double, int, const std::string &, const std::vector<double> &>());
 
   py::class_<B1, Descriptor>(m, "B1")
-      .def(py::init<const std::string &, const std::string &,
-                    const std::vector<double> &, const std::vector<double> &,
-                    const std::vector<int> &>());
+      .def(py::init<const std::string &, const std::string &, const std::vector<double> &, const std::vector<double> &, const std::vector<int> &>());
 
   py::class_<B2, Descriptor>(m, "B2")
-      .def(py::init<const std::string &, const std::string &,
-                    const std::vector<double> &, const std::vector<double> &,
-                    const std::vector<int> &>())
-      .def(py::init<const std::string &, const std::string &,
-                    const std::vector<double> &, const std::vector<double> &,
-                    const std::vector<int> &,
-                    const Eigen::MatrixXd &>())
+      .def(py::init<const std::string &, const std::string &, const std::vector<double> &, const std::vector<double> &, const std::vector<int> &>())
+      .def(py::init<const std::string &, const std::string &, const std::vector<double> &, const std::vector<double> &, const std::vector<int> &, const Eigen::MatrixXd &>())
       .def_readonly("radial_basis", &B2::radial_basis)
       .def_readonly("cutoff_function", &B2::cutoff_function)
       .def_readonly("radial_hyps", &B2::radial_hyps)
@@ -140,19 +84,38 @@ PYBIND11_MODULE(_C_flare, m) {
       .def_readonly("descriptor_settings", &B2::descriptor_settings);
 
   py::class_<B2_Simple, Descriptor>(m, "B2_Simple")
-      .def(py::init<const std::string &, const std::string &,
-                    const std::vector<double> &, const std::vector<double> &,
-                    const std::vector<int> &>());
+      .def(py::init<const std::string &, const std::string &, const std::vector<double> &, const std::vector<double> &, const std::vector<int> &>());
 
   py::class_<B2_Norm, Descriptor>(m, "B2_Norm")
-      .def(py::init<const std::string &, const std::string &,
-                    const std::vector<double> &, const std::vector<double> &,
-                    const std::vector<int> &>());
+      .def(py::init<const std::string &, const std::string &, const std::vector<double> &, const std::vector<double> &, const std::vector<int> &>());
 
   py::class_<B3, Descriptor>(m, "B3")
-      .def(py::init<const std::string &, const std::string &,
-                    const std::vector<double> &, const std::vector<double> &,
-                    const std::vector<int> &>());
+      .def(py::init<const std::string &, const std::string &, const std::vector<double> &, const std::vector<double> &, const std::vector<int> &>());
+
+  py::class_<DescriptorValues>(m, "DescriptorValues")
+      .def(py::init<>())
+      .def_readwrite("n_descriptors", &DescriptorValues::n_descriptors)
+      .def_readwrite("n_types", &DescriptorValues::n_types)
+      .def_readwrite("n_atoms", &DescriptorValues::n_atoms)
+      .def_readwrite("volume", &DescriptorValues::volume)
+      .def_readwrite("descriptors", &DescriptorValues::descriptors)
+      .def_readwrite("descriptor_force_dervs", &DescriptorValues::descriptor_force_dervs)
+      .def_readwrite("neighbor_coordinates", &DescriptorValues::neighbor_coordinates)
+      .def_readwrite("descriptor_norms", &DescriptorValues::descriptor_norms)
+      .def_readwrite("descriptor_force_dots", &DescriptorValues::descriptor_force_dots)
+      .def_readwrite("cutoff_values", &DescriptorValues::cutoff_values)
+      .def_readwrite("cutoff_dervs", &DescriptorValues::cutoff_dervs)
+      .def_readwrite("neighbor_counts", &DescriptorValues::neighbor_counts)
+      .def_readwrite("cumulative_neighbor_counts", &DescriptorValues::cumulative_neighbor_counts)
+      .def_readwrite("cumulative_type_count", &DescriptorValues::cumulative_type_count)
+      .def_readwrite("atom_indices", &DescriptorValues::atom_indices)
+      .def_readwrite("neighbor_indices", &DescriptorValues::neighbor_indices)
+      .def_readwrite("n_clusters_by_type", &DescriptorValues::n_clusters_by_type)
+      .def_readwrite("n_neighbors_by_type", &DescriptorValues::n_neighbors_by_type);
+
+  py::class_<ClusterDescriptor>(m, "ClusterDescriptor")
+      .def_readonly("descriptors", &ClusterDescriptor::descriptors)
+      .def_readonly("descriptor_norms", &ClusterDescriptor::descriptor_norms);
 
   // Kernel functions
   py::class_<Kernel>(m, "Kernel");
@@ -161,8 +124,7 @@ PYBIND11_MODULE(_C_flare, m) {
       .def(py::init<double, double>())
       .def_readonly("sigma", &NormalizedDotProduct::sigma)
       .def_readwrite("power", &NormalizedDotProduct::power)
-      .def_readonly("kernel_hyperparameters",
-                    &NormalizedDotProduct::kernel_hyperparameters)
+      .def_readonly("kernel_hyperparameters", &NormalizedDotProduct::kernel_hyperparameters)
       .def("envs_envs", &NormalizedDotProduct::envs_envs)
       .def("envs_struc", &NormalizedDotProduct::envs_struc)
       .def("struc_struc", &NormalizedDotProduct::struc_struc);
@@ -171,8 +133,7 @@ PYBIND11_MODULE(_C_flare, m) {
       .def(py::init<double, double>())
       .def_readonly("sigma", &DotProduct::sigma)
       .def_readwrite("power", &DotProduct::power)
-      .def_readonly("kernel_hyperparameters",
-                    &DotProduct::kernel_hyperparameters)
+      .def_readonly("kernel_hyperparameters", &DotProduct::kernel_hyperparameters)
       .def("envs_envs", &DotProduct::envs_envs)
       .def("envs_struc", &DotProduct::envs_struc)
       .def("struc_struc", &DotProduct::struc_struc);

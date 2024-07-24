@@ -60,7 +60,7 @@ public:
   /** @name Descriptors */
   ///@{
   std::vector<Descriptor *> descriptor_calculators[2];
-  std::vector<DescriptorValues> descriptors[2];
+  std::vector<DescriptorValues> descriptors;
 
   std::vector<Descriptor *> descriptor_calculators_comb[2];
   std::vector<DescriptorValues> descriptors_comb[2];

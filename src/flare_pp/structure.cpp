@@ -31,7 +31,7 @@ Structure ::Structure(const Eigen::MatrixXd &cell,
     : Structure(cell, species, positions) {
 
   this->cutoff = cutoff;
-  this->descriptor_calculators = descriptor_calculators;
+  this->descriptor_calculators[0] = descriptor_calculators;
   sweep = ceil(cutoff / single_sweep_cutoff);
 
   // Initialize neighbor count.
@@ -44,8 +44,8 @@ Structure ::Structure(const Eigen::MatrixXd &cell,
 
 void Structure ::compute_descriptors(){
   descriptors.clear();
-  for (int i = 0; i < descriptor_calculators.size(); i++){
-    descriptors.push_back(descriptor_calculators[i]->compute_struc(*this));
+  for (int i = 0; i < descriptor_calculators[0].size(); i++){
+    descriptors.push_back(descriptor_calculators[0][i]->compute_struc(*this));
   }
 }
 

@@ -48,7 +48,7 @@ PYBIND11_MODULE(_C_flare, m) {
       .def_readwrite("local_uncertainties", &Structure::local_uncertainties)
       .def_readwrite("descriptors", &Structure::descriptors)
       .def_readwrite("descriptor_calculators",
-                    &Structure::descriptor_calculators[2])
+                    &Structure::descriptor_calculators)
       .def("compute_descriptors", &Structure::compute_descriptors)
       .def("wrap_positions", &Structure::wrap_positions)
       .def_static("to_json", &Structure::to_json)
@@ -88,6 +88,18 @@ PYBIND11_MODULE(_C_flare, m) {
       .def_readonly("descriptor_norms", &ClusterDescriptor::descriptor_norms);
 
   // Descriptor calculators
+  py::class_<DescriptorCalculator>(m, "DescriptorCalculator")
+      .def(py::init<>());
+
+  py::class_<std::array<DescriptorCalculator, 2>>(m, "DescriptorCalculatorArray")
+      .def(py::init<>())
+      .def("__getitem__", [](const std::array<DescriptorCalculator, 2> &a, size_t i) {
+        if (i >= 2) throw std::out_of_range("Index out of range");
+        return a[i];})
+      .def("__setitem__", [](std::array<DescriptorCalculator, 2> &a, size_t i, const DescriptorCalculator &v) {
+        if (i >= 2) throw std::out_of_range("Index out of range");
+        a[i] = v;});
+
   py::class_<Descriptor>(m, "Descriptor")
       .def("compute_struc", &Descriptor::compute_struc);
 

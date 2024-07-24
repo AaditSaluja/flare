@@ -25,6 +25,19 @@
 
 namespace py = pybind11;
 
+std::vector<Descriptor *> get_descriptor_calculators(const Structure &structure, size_t index) {
+    if (index >= 2) {
+        throw std::out_of_range("Index out of range");
+    }
+    return structure.descriptor_calculators[index];
+}
+
+void set_descriptor_calculators(Structure &structure, size_t index, const std::vector<Descriptor *> &value) {
+    if (index >= 2) {
+        throw std::out_of_range("Index out of range");
+    }
+    structure.descriptor_calculators[index] = value;
+}
 
 PYBIND11_MODULE(_C_flare, m) {
   // Structure
@@ -48,7 +61,8 @@ PYBIND11_MODULE(_C_flare, m) {
       .def_readwrite("variance_efs", &Structure::variance_efs)
       .def_readwrite("local_uncertainties", &Structure::local_uncertainties)
       .def_readwrite("descriptors", &Structure::descriptors)
-      .def_readwrite("descriptor_calculators", &Structure::descriptor_calculators)
+      .def("get_descriptor_calculators", &get_descriptor_calculators)
+      .def("set_descriptor_calculators", &set_descriptor_calculators);
       .def("compute_descriptors", &Structure::compute_descriptors)
       .def("wrap_positions", &Structure::wrap_positions)
       .def_static("to_json", &Structure::to_json)

@@ -1190,7 +1190,7 @@ void SparseGP::write_mapping_coefficients(std::string file_name,
 
   // Write descriptor information to file.
   int coeff_size = mapping_coeffs.row(0).size();
-  training_structures[0].descriptor_calculators[0][kernel_index]->write_to_file(
+  training_structures[0].descriptor_calculators[1][kernel_index]->write_to_file(
       coeff_file, coeff_size);
 
   // Write beta vectors to file.
@@ -1264,7 +1264,7 @@ void SparseGP::write_varmap_coefficients(
 
   // Write descriptor information to file.
   int coeff_size = varmap_coeffs.row(0).size();
-  training_structures[0].descriptor_calculators[0][kernel_index]->
+  training_structures[0].descriptor_calculators[1][kernel_index]->
     write_to_file(coeff_file, coeff_size);
 
   // Write beta vectors to file.
@@ -1338,7 +1338,7 @@ void SparseGP::write_L_inverse(
   int sparse_count = 0;
   for (int i = 0; i < n_kernels; i++) {
     //  sparse_descriptors[i].descriptors[s];
-    training_structures[0].descriptor_calculators[0][i]->
+    training_structures[0].descriptor_calculators[1][i]->
       write_to_file(coeff_file, n_kernels);
 
     coeff_file << std::scientific << std::setprecision(16);

@@ -25,6 +25,7 @@
 
 namespace py = pybind11;
 
+// Pybinding B1 and B2 descriptor calculator array
 std::vector<Descriptor *> get_descriptor_calculators(const Structure &structure, size_t index) {
     if (index >= 2) {
         throw std::out_of_range("Index out of range");
